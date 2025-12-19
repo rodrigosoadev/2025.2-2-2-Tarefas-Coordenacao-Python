@@ -19,7 +19,7 @@ from threading import Semaphore, Lock
 # CONFIGURAÇÕES
 # ============================
 
-# TODO: Defina as constantes
+# Constantes já definidas para você
 TAMANHO_BUFFER = 10          # Capacidade máxima do buffer
 NUM_PRODUTORES = 2           # Número de threads produtoras
 NUM_CONSUMIDORES = 2         # Número de threads consumidoras
@@ -29,7 +29,7 @@ NUM_ITENS_POR_THREAD = 10    # Quantos itens cada produtor/consumidor processa
 # ESTRUTURAS DE DADOS COMPARTILHADAS
 # ============================
 
-# TODO: Crie o buffer (lista vazia)
+# Buffer já criado para você (lista vazia)
 buffer = []
 
 # TODO: Crie o semáforo para itens disponíveis (inicializado com 0)

@@ -23,13 +23,13 @@ O problema do produtor-consumidor é um clássico da programação concorrente. 
 ## ✅ Checklist Passo a Passo
 
 ### Fase 1: Preparação (15 minutos)
-- [ ] Criar arquivo `produtor_consumidor.py`
+- [ ] Criar arquivo `produtor_consumidor.py` ou usar o `template_produtor_consumidor.py`
 - [ ] Importar bibliotecas necessárias: `threading`, `time`, `random`
 - [ ] Importar `Semaphore` e `Lock` de `threading`
-- [ ] Definir constantes: `TAMANHO_BUFFER = 10`, `NUM_PRODUTORES = 2`, `NUM_CONSUMIDORES = 2`
+- [ ] Verificar as constantes já definidas: `TAMANHO_BUFFER`, `NUM_PRODUTORES`, `NUM_CONSUMIDORES`
 
 ### Fase 2: Estrutura de Dados (10 minutos)
-- [ ] Criar uma lista vazia para representar o buffer: `buffer = []`
+- [ ] Verificar que o buffer (lista vazia) já está criado
 - [ ] Criar um semáforo para controlar itens disponíveis: `itens_disponiveis = Semaphore(0)`
 - [ ] Criar um semáforo para controlar espaços vazios: `espacos_vazios = Semaphore(TAMANHO_BUFFER)`
 - [ ] Criar um lock (mutex) para proteger o acesso ao buffer: `lock = Lock()`

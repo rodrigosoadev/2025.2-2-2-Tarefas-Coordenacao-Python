@@ -6,8 +6,8 @@ INSTRUÇÕES:
 Complete este template seguindo o checklist da atividade.
 Preencha as seções marcadas com TODO.
 
-Nome do Aluno: _______________________
-Data: _______________________
+Nome do Aluno: Rodrigo Soares
+Data: 01/02/2026
 """
 
 import threading
@@ -19,27 +19,25 @@ from threading import Semaphore, Lock
 # CONFIGURAÇÕES
 # ============================
 
-# Constantes já definidas para você
-TAMANHO_BUFFER = 10          # Capacidade máxima do buffer
-NUM_PRODUTORES = 2           # Número de threads produtoras
-NUM_CONSUMIDORES = 2         # Número de threads consumidoras
-NUM_ITENS_POR_THREAD = 10    # Quantos itens cada produtor/consumidor processa
+TAMANHO_BUFFER = 10           # Capacidade máxima do buffer
+NUM_PRODUTORES = 2            # Número de threads produtoras
+NUM_CONSUMIDORES = 2          # Número de threads consumidoras
+NUM_ITENS_POR_THREAD = 10     # Quantos itens cada produtor/consumidor processa
 
 # ============================
 # ESTRUTURAS DE DADOS COMPARTILHADAS
 # ============================
 
-# Buffer já criado para você (lista vazia)
 buffer = []
 
-# TODO: Crie o semáforo para itens disponíveis (inicializado com 0)
-# itens_disponiveis = ...
+# Semáforo para itens disponíveis (inicializado com 0)
+itens_disponiveis = Semaphore(0)
 
-# TODO: Crie o semáforo para espaços vazios (inicializado com TAMANHO_BUFFER)
-# espacos_vazios = ...
+# Semáforo para espaços vazios (inicializado com o tamanho máximo)
+espacos_vazios = Semaphore(TAMANHO_BUFFER)
 
-# TODO: Crie o lock para proteger o acesso ao buffer
-# lock = ...
+# Lock para proteger o acesso ao buffer (Região Crítica)
+lock = Lock()
 
 # ============================
 # FUNÇÃO PRODUTOR
@@ -48,41 +46,32 @@ buffer = []
 def produtor(id_produtor):
     """
     Função executada por cada thread produtora.
-    
-    Args:
-        id_produtor: Identificador único do produtor
     """
-    # TODO: Implemente a função produtor
-    # Dica: Use um loop para produzir NUM_ITENS_POR_THREAD itens
-    
     for i in range(NUM_ITENS_POR_THREAD):
-        # TODO: Gere um item aleatório
-        # item = ...
+        # Gera um item aleatório entre 1 e 100
+        item = random.randint(1, 100)
         
-        # TODO: Aguarde por um espaço vazio no buffer
-        # Dica: Use espacos_vazios.acquire()
+        # Aguarda por um espaço vazio no buffer
+        espacos_vazios.acquire()
         
-        # TODO: Adquira o lock para acessar o buffer
-        # Dica: Use lock.acquire()
+        # Adquira o lock para acessar o buffer de forma exclusiva
+        lock.acquire()
         
         try:
-            # TODO: Adicione o item ao buffer
-            
-            # TODO: Exiba uma mensagem informando o que foi produzido
-            # Exemplo: print(f"Produtor {id_produtor} produziu item {item}")
-            pass
+            # Adiciona o item ao final da lista
+            buffer.append(item)
+            print(f"📦 Produtor {id_produtor} produziu item {item}. Buffer: {len(buffer)}/{TAMANHO_BUFFER}")
         finally:
-            # TODO: Libere o lock
-            # Dica: Use lock.release()
-            pass
+            # Libera o lock sempre, mesmo se houver erro
+            lock.release()
         
-        # TODO: Sinalize que há um novo item disponível
-        # Dica: Use itens_disponiveis.release()
+        # Sinalize que há um novo item disponível para consumo
+        itens_disponiveis.release()
         
-        # TODO: Simule o tempo de produção
-        # Dica: Use time.sleep(random.uniform(0.1, 0.5))
+        # Simula o tempo de produção
+        time.sleep(random.uniform(0.1, 0.5))
     
-    print(f"Produtor {id_produtor} finalizou")
+    print(f"✅ Produtor {id_produtor} finalizou seu trabalho.")
 
 # ============================
 # FUNÇÃO CONSUMIDOR
@@ -91,40 +80,29 @@ def produtor(id_produtor):
 def consumidor(id_consumidor):
     """
     Função executada por cada thread consumidora.
-    
-    Args:
-        id_consumidor: Identificador único do consumidor
     """
-    # TODO: Implemente a função consumidor
-    # Dica: Use um loop para consumir NUM_ITENS_POR_THREAD itens
-    
     for i in range(NUM_ITENS_POR_THREAD):
-        # TODO: Aguarde por um item disponível no buffer
-        # Dica: Use itens_disponiveis.acquire()
+        # Aguarda por um item disponível no buffer
+        itens_disponiveis.acquire()
         
-        # TODO: Adquira o lock para acessar o buffer
-        # Dica: Use lock.acquire()
+        # Adquira o lock para acessar o buffer de forma exclusiva
+        lock.acquire()
         
         try:
-            # TODO: Remova o primeiro item do buffer
-            # Dica: Use buffer.pop(0)
-            # item = ...
-            
-            # TODO: Exiba uma mensagem informando o que foi consumido
-            # Exemplo: print(f"Consumidor {id_consumidor} consumiu item {item}")
-            pass
+            # Remova o primeiro item do buffer (FIFO)
+            item = buffer.pop(0)
+            print(f"🍴 Consumidor {id_consumidor} consumiu item {item}. Buffer: {len(buffer)}/{TAMANHO_BUFFER}")
         finally:
-            # TODO: Libere o lock
-            # Dica: Use lock.release()
-            pass
+            # Libera o lock
+            lock.release()
         
-        # TODO: Sinalize que há um novo espaço vazio
-        # Dica: Use espacos_vazios.release()
+        # Sinalize que liberou um espaço vazio no buffer
+        espacos_vazios.release()
         
-        # TODO: Simule o tempo de consumo
-        # Dica: Use time.sleep(random.uniform(0.1, 0.5))
+        # Simula o tempo de consumo
+        time.sleep(random.uniform(0.1, 0.5))
     
-    print(f"Consumidor {id_consumidor} finalizou")
+    print(f"✨ Consumidor {id_consumidor} finalizou seu trabalho.")
 
 # ============================
 # PROGRAMA PRINCIPAL
@@ -135,35 +113,31 @@ def main():
     Função principal que inicializa e gerencia todas as threads.
     """
     print("=" * 60)
-    print("PROBLEMA DO PRODUTOR-CONSUMIDOR")
+    print("PROBLEMA DO PRODUTOR-CONSUMIDOR - SINCRONIZAÇÃO")
     print("=" * 60)
     print()
     
-    # TODO: Crie uma lista para armazenar as threads
     threads = []
     
-    # TODO: Crie e inicie as threads produtoras
-    # Dica: Use um loop de 0 até NUM_PRODUTORES
-    # Para cada iteração:
-    #   - Crie uma thread: threading.Thread(target=produtor, args=(i,))
-    #   - Adicione à lista de threads
-    #   - Inicie a thread com .start()
+    # Crie e inicie as threads produtoras
+    for i in range(NUM_PRODUTORES):
+        t = threading.Thread(target=produtor, args=(i,))
+        threads.append(t)
+        t.start()
     
-    # TODO: Crie e inicie as threads consumidoras
-    # Dica: Use um loop de 0 até NUM_CONSUMIDORES
-    # Para cada iteração:
-    #   - Crie uma thread: threading.Thread(target=consumidor, args=(i,))
-    #   - Adicione à lista de threads
-    #   - Inicie a thread com .start()
+    # Crie e inicie as threads consumidoras
+    for i in range(NUM_CONSUMIDORES):
+        t = threading.Thread(target=consumidor, args=(i,))
+        threads.append(t)
+        t.start()
     
-    # TODO: Aguarde todas as threads terminarem
-    # Dica: Use um loop em todas as threads e chame .join()
-    # for t in threads:
-    #     t.join()
+    # Aguarda todas as threads terminarem para finalizar o programa
+    for t in threads:
+        t.join()
     
     print()
     print("=" * 60)
-    print("Programa finalizado!")
+    print("Sucesso: Todos os itens foram produzidos e consumidos!")
     print("=" * 60)
 
 # ============================
@@ -171,5 +145,4 @@ def main():
 # ============================
 
 if __name__ == "__main__":
-    # TODO: Chame a função main()
-    pass
+    main()
